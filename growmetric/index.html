@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="en" data-visualize-standalone>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Growmetric Project Command Center</title>
+<meta name="theme-color" content="#0C1323">
+<style id="growmetric-brand-theme">
+  :root {
+    --background: light-dark(#F5F8F6, #07110C);
+    --foreground: light-dark(#0C1323, #F5F8F6);
+    --card: light-dark(#FFFFFF, #0D1A13);
+    --card-foreground: var(--foreground);
+    --primary: light-dark(#1C7239, #55B777);
+    --primary-foreground: #FFFFFF;
+    --secondary: light-dark(#FFFFFF, #13251A);
+    --secondary-foreground: var(--foreground);
+    --muted: light-dark(#E4EAE6, #1B2C21);
+    --muted-foreground: light-dark(#5A6B7B, #AAB8AF);
+    --accent: light-dark(#E8F4EC, #153622);
+    --accent-foreground: light-dark(#0F4A26, #79CB94);
+    --destructive: light-dark(#B42318, #FF8A80);
+    --border: light-dark(#D8E2DB, #24372B);
+    --input: var(--border);
+    --ring: #1C7239;
+    --viz-series-1: #1C7239;
+    --viz-series-2: #247A48;
+    --viz-series-3: #D69E2E;
+    --viz-series-4: #B42318;
+    --viz-series-5: #4F6FA8;
+  }
+</style>
+<style>:root {
+  color-scheme: light dark;
+  background-color: transparent !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --main-surface-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
+  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --card-foreground: var(--foreground);
+  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
+  --popover-foreground: var(--foreground);
+  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
+  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
+  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: light-dark(
+    rgb(26 28 31 / 49.4%),
+    rgb(255 255 255 / 49.8%)
+  );
+  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
+  --accent-foreground: var(--primary);
+  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
+  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
+  --input: light-dark(
+    rgb(26 28 31 / 11.8%),
+    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  );
+  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
+  --font-size-base: 14px;
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --radius: 10px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+  --color-background-primary: var(--background);
+  --color-text-primary: var(--foreground);
+  --color-border-secondary: var(--border);
+}
+
+:root[data-visualize-standalone] {
+  background-color: var(--background) !important;
+}
+
+/* Generic mobile code-block hosts provide light/dark mode but no series palette.
+   AppBlock hosts set all six variables themselves. */
+:root:not([data-app-block-surface]) {
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(#f3883b, #f59a56);
+  --viz-series-3: light-dark(#5dc977, #74d58b);
+  --viz-series-4: light-dark(#eb77b1, #f08fc0);
+  --viz-series-5: light-dark(#9b79ec, #aa91ef);
+  --viz-series-6: light-dark(#3ab9b1, #5acbc2);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  margin: 0;
+  padding: 5px;
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+:root:not([data-app-block-surface]) > body {
+  padding: 12px;
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--viz-font-weight-medium);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget > :not(.card) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-legend,
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn {
+  appearance: button;
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: padding-box;
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+    [aria-pressed="true"],
+    [aria-selected="true"],
+    .is-selected
+  ) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+</style>
+</head>
+<body>
+<div id="growmetric-command-center">
+  <style>
+    #growmetric-command-center {
+      --gm-success: var(--viz-series-1);
+      --gm-progress: var(--viz-series-2);
+      --gm-warning: var(--viz-series-3);
+      --gm-critical: var(--viz-series-4);
+      --gm-info: var(--viz-series-5);
+      min-height:100%; padding:16px; border-radius:20px;
+      background:var(--background); color:var(--foreground);
+      font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+    }
+    #growmetric-command-center * { box-sizing:border-box; }
+    #growmetric-command-center .gm-shell { max-width:1240px; margin:0 auto; }
+    #growmetric-command-center .gm-topbar,
+    #growmetric-command-center .gm-brand,
+    #growmetric-command-center .gm-live,
+    #growmetric-command-center .gm-row,
+    #growmetric-command-center .gm-section-head,
+    #growmetric-command-center .gm-task-head,
+    #growmetric-command-center .gm-task-meta,
+    #growmetric-command-center .gm-person-head,
+    #growmetric-command-center .gm-project-head { display:flex; align-items:center; }
+    #growmetric-command-center .gm-topbar,
+    #growmetric-command-center .gm-section-head,
+    #growmetric-command-center .gm-task-head,
+    #growmetric-command-center .gm-person-head,
+    #growmetric-command-center .gm-project-head { justify-content:space-between; gap:12px; }
+    #growmetric-command-center .gm-brand { gap:10px; }
+    #growmetric-command-center .gm-mark { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; background:var(--primary); color:var(--primary-foreground); font-weight:500; }
+    #growmetric-command-center .gm-brand strong { display:block; font-weight:500; letter-spacing:.02em; }
+    #growmetric-command-center .gm-brand em { display:block; color:var(--muted-foreground); font-size:11px; }
+    #growmetric-command-center .gm-live { gap:7px; font-size:12px; }
+    #growmetric-command-center .gm-dot { width:8px; height:8px; border-radius:50%; background:var(--gm-warning); }
+    #growmetric-command-center .gm-dot.is-live { background:var(--gm-success); box-shadow:0 0 0 5px color-mix(in srgb,var(--gm-success) 15%,transparent); }
+    #growmetric-command-center .gm-sync { font-size:11px; color:var(--muted-foreground); text-align:right; }
+    #growmetric-command-center .gm-nav { margin:16px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    #growmetric-command-center .gm-nav .btn { min-height:44px; }
+    #growmetric-command-center .gm-page { display:none; }
+    #growmetric-command-center .gm-page.is-active { display:block; }
+    #growmetric-command-center .gm-hero { padding:22px; border:1px solid var(--border); border-radius:18px; background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 16%,var(--card)),var(--card)); }
+    #growmetric-command-center .gm-eyebrow { color:var(--gm-success); font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:500; }
+    #growmetric-command-center h1 { margin:7px 0 6px; font-size:clamp(24px,4vw,38px); line-height:1.1; font-weight:500; }
+    #growmetric-command-center .gm-hero p { margin:0; color:var(--muted-foreground); max-width:820px; }
+    #growmetric-command-center .gm-stats { margin-top:14px; grid-template-columns:repeat(5,minmax(0,1fr)); }
+    #growmetric-command-center .gm-stat { min-height:104px; }
+    #growmetric-command-center .gm-stat-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    #growmetric-command-center .gm-stat-note { margin-top:4px; color:var(--muted-foreground); font-size:11px; }
+    #growmetric-command-center .gm-subnav { margin:14px 0; display:flex; gap:8px; }
+    #growmetric-command-center .gm-subnav .btn { flex:1; }
+    #growmetric-command-center .gm-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(280px,.72fr); gap:14px; }
+    #growmetric-command-center .gm-panel { min-width:0; padding:17px; border:1px solid var(--border); border-radius:17px; background:var(--card); color:var(--card-foreground); }
+    #growmetric-command-center .gm-section-head h2 { margin:0; font-size:17px; font-weight:500; }
+    #growmetric-command-center .gm-controls { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:13px 0; }
+    #growmetric-command-center .gm-list { display:grid; gap:8px; }
+    #growmetric-command-center .gm-task { padding:12px; border:1px solid var(--border); border-radius:13px; transition:background-color .2s ease,transform .2s ease; }
+    #growmetric-command-center .gm-task:hover { background:var(--accent); transform:translateY(-1px); }
+    #growmetric-command-center .gm-task-title { min-width:0; font-weight:500; overflow-wrap:anywhere; }
+    #growmetric-command-center .gm-task-meta { gap:7px; flex-wrap:wrap; margin-top:7px; color:var(--muted-foreground); font-size:11px; }
+    #growmetric-command-center .gm-priority.is-top { background:color-mix(in srgb,var(--destructive) 18%,var(--card)); }
+    #growmetric-command-center .gm-priority.is-high { background:color-mix(in srgb,var(--gm-warning) 20%,var(--card)); }
+    #growmetric-command-center .gm-overdue { border-color:color-mix(in srgb,var(--destructive) 42%,var(--border)); }
+    #growmetric-command-center .gm-bars { margin-top:15px; display:grid; gap:12px; }
+    #growmetric-command-center .gm-bar-head { display:flex; justify-content:space-between; gap:10px; font-size:12px; }
+    #growmetric-command-center .gm-bar { margin-top:5px; height:8px; border-radius:999px; background:var(--muted); overflow:hidden; }
+    #growmetric-command-center .gm-bar span { display:block; height:100%; border-radius:inherit; background:var(--gm-progress); transition:width .5s ease; }
+    #growmetric-command-center .gm-callout { margin-top:15px; padding:13px; border-radius:13px; background:var(--muted); font-size:12px; }
+    #growmetric-command-center .gm-callout.is-warning { background:color-mix(in srgb,var(--gm-warning) 14%,var(--muted)); }
+    #growmetric-command-center .gm-more { width:100%; margin-top:9px; }
+    #growmetric-command-center .gm-worklog { padding:12px; border-bottom:1px solid var(--border); }
+    #growmetric-command-center .gm-worklog:last-child { border-bottom:0; }
+    #growmetric-command-center .gm-worklog strong { font-weight:500; }
+    #growmetric-command-center .gm-worklog p { margin:6px 0 0; color:var(--muted-foreground); white-space:pre-line; overflow-wrap:anywhere; }
+    #growmetric-command-center .gm-person-grid,
+    #growmetric-command-center .gm-project-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    #growmetric-command-center .gm-person,
+    #growmetric-command-center .gm-project { padding:15px; border:1px solid var(--border); border-radius:15px; background:var(--card); color:var(--card-foreground); cursor:pointer; }
+    #growmetric-command-center .gm-person.is-selected,
+    #growmetric-command-center .gm-project.is-selected { border-color:var(--primary); box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 16%,transparent); }
+    #growmetric-command-center .gm-avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:11px; background:var(--muted); font-weight:500; }
+    #growmetric-command-center .gm-health { width:10px; height:10px; border-radius:50%; background:var(--gm-success); }
+    #growmetric-command-center .gm-health.is-risk { background:var(--gm-warning); }
+    #growmetric-command-center .gm-health.is-critical { background:var(--destructive); }
+    #growmetric-command-center .gm-mini { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:13px; }
+    #growmetric-command-center .gm-mini div { padding:8px; border-radius:10px; background:var(--muted); text-align:center; }
+    #growmetric-command-center .gm-mini strong { display:block; font-weight:500; }
+    #growmetric-command-center .gm-mini span { font-size:10px; color:var(--muted-foreground); }
+    #growmetric-command-center .gm-detail { margin-top:14px; }
+    #growmetric-command-center .gm-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    #growmetric-command-center .gm-empty { padding:34px 12px; color:var(--muted-foreground); text-align:center; }
+    #growmetric-command-center .gm-footer { margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted-foreground); font-size:11px; }
+    @media (max-width:940px) {
+      #growmetric-command-center .gm-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      #growmetric-command-center .gm-grid { grid-template-columns:1fr; }
+      #growmetric-command-center .gm-person-grid,#growmetric-command-center .gm-project-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width:650px) {
+      #growmetric-command-center { padding:9px; }
+      #growmetric-command-center .gm-topbar { align-items:flex-start; }
+      #growmetric-command-center .gm-nav { grid-template-columns:1fr; }
+      #growmetric-command-center .gm-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #growmetric-command-center .gm-controls { grid-template-columns:1fr 1fr; }
+      #growmetric-command-center .gm-person-grid,#growmetric-command-center .gm-project-grid,#growmetric-command-center .gm-detail-grid { grid-template-columns:1fr; }
+      #growmetric-command-center .gm-panel { padding:13px; }
+    }
+  </style>
+
+  <main class="gm-shell">
+    <header class="gm-topbar">
+      <div class="gm-brand"><div class="gm-mark">G</div><div><strong>GROWMETRIC COMMAND CENTER</strong><em>Growth Backed by Metrics</em></div></div>
+      <div><div class="gm-live"><span class="gm-dot" id="gm-live-dot"></span><span id="gm-live-label">Connecting to team workbook…</span></div><div class="gm-sync" id="gm-sync">Preparing the latest view</div></div>
+    </header>
+
+    <nav class="gm-nav" aria-label="Dashboard pages">
+      <button type="button" class="btn btn-primary" data-page="execution" aria-pressed="true">01 · Execution</button>
+      <button type="button" class="btn" data-page="people" aria-pressed="false">02 · People</button>
+      <button type="button" class="btn" data-page="projects" aria-pressed="false">03 · Projects</button>
+    </nav>
+
+    <section class="gm-page is-active" data-page-panel="execution">
+      <div class="gm-hero"><div class="gm-eyebrow">Live delivery control</div><h1>Know what is moving, what is stuck, and who needs support.</h1><p>One operating view for priorities, deadlines, daily proof of work, workload balance and project risk.</p></div>
+      <section class="viz-grid gm-stats" aria-label="Execution summary">
+        <div class="card viz-stat gm-stat"><div class="gm-stat-top"><span class="text-muted">Open actions</span><span class="viz-badge">Queue</span></div><div class="viz-stat-value" id="gm-open">27</div><div class="gm-stat-note" id="gm-open-note">20 not started</div></div>
+        <div class="card viz-stat gm-stat"><div class="gm-stat-top"><span class="text-muted">In progress</span><span class="viz-badge">WIP</span></div><div class="viz-stat-value" id="gm-wip">6</div><div class="gm-stat-note">Active execution</div></div>
+        <div class="card viz-stat gm-stat"><div class="gm-stat-top"><span class="text-muted">Completed</span><span class="viz-badge">Wins</span></div><div class="viz-stat-value" id="gm-completed">13</div><div class="gm-stat-note" id="gm-rate">33% completion rate</div></div>
+        <div class="card viz-stat gm-stat"><div class="gm-stat-top"><span class="text-muted">Overdue</span><span class="viz-badge">Risk</span></div><div class="viz-stat-value" id="gm-overdue">0</div><div class="gm-stat-note">Needs intervention</div></div>
+        <div class="card viz-stat gm-stat"><div class="gm-stat-top"><span class="text-muted">Latest log coverage</span><span class="viz-badge">Proof</span></div><div class="viz-stat-value" id="gm-coverage">0%</div><div class="gm-stat-note" id="gm-coverage-note">0 of 0 logged</div></div>
+      </section>
+      <div class="gm-subnav" role="group" aria-label="Execution views"><button type="button" class="btn btn-primary" id="gm-action-tab" aria-pressed="true">Action Items</button><button type="button" class="btn" id="gm-log-tab" aria-pressed="false">Daily Work Log</button></div>
+
+      <div id="gm-action-view">
+        <div class="gm-grid">
+          <div class="gm-panel">
+            <div class="gm-section-head"><h2>Action queue</h2><span class="viz-badge" id="gm-task-count">0 tasks</span></div>
+            <div class="gm-controls">
+              <label class="form-label">Owner<select class="form-select" id="gm-owner-filter"><option value="all">All owners</option></select></label>
+              <label class="form-label">Project<select class="form-select" id="gm-project-filter"><option value="all">All projects</option></select></label>
+              <label class="form-label">Status<select class="form-select" id="gm-status-filter"><option value="open">Open only</option><option value="all">All statuses</option><option value="WIP">WIP</option><option value="Not Started">Not Started</option><option value="Recurring">Recurring</option><option value="Completed">Completed</option></select></label>
+              <label class="form-label">Priority<select class="form-select" id="gm-priority-filter"><option value="all">All priorities</option><option value="Top">Top</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></label>
+            </div>
+            <div class="gm-list" id="gm-task-list" aria-live="polite"></div><button type="button" class="btn gm-more" id="gm-task-more">Show more</button>
+          </div>
+          <aside class="gm-panel"><div class="gm-section-head"><h2>Workload by owner</h2><span class="viz-badge">Open</span></div><div class="gm-bars" id="gm-owner-bars" role="img" aria-label="Open actions by owner"></div><div class="gm-callout" id="gm-execution-callout">Loading execution insight…</div><div class="gm-footer"><span>Source: Action items</span><a class="btn" href="https://docs.google.com/spreadsheets/d/1yOwch5aUaR-1qUzsJcueLr5jLO0aJpBSSG8vnpC0Ve8/edit#gid=642216394" target="_blank" rel="noreferrer">Update action items</a></div></aside>
+        </div>
+      </div>
+
+      <div id="gm-log-view" hidden>
+        <div class="gm-grid">
+          <div class="gm-panel"><div class="gm-section-head"><h2>Latest daily work logs</h2><span class="viz-badge" id="gm-latest-date">Latest date</span></div><div class="gm-controls"><label class="form-label">Team member<select class="form-select" id="gm-log-person"><option value="all">All team members</option></select></label><label class="form-label">Attendance<select class="form-select" id="gm-attendance-filter"><option value="all">All attendance</option></select></label></div><div id="gm-worklog-list"></div><button type="button" class="btn gm-more" id="gm-log-more">Show more</button></div>
+          <aside class="gm-panel"><div class="gm-section-head"><h2>Attendance mix</h2><span class="viz-badge">Logged days</span></div><div class="gm-bars" id="gm-attendance-bars"></div><div class="gm-callout is-warning" id="gm-log-callout">Loading logging discipline…</div><div class="gm-footer"><span>Source: DOD Work tracker</span><a class="btn" href="https://docs.google.com/spreadsheets/d/1yOwch5aUaR-1qUzsJcueLr5jLO0aJpBSSG8vnpC0Ve8/edit#gid=118699934" target="_blank" rel="noreferrer">Update daily logs</a></div></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="gm-page" data-page-panel="people">
+      <div class="gm-hero"><div class="gm-eyebrow">People intelligence</div><h1>Balance ownership without rewarding activity theatre.</h1><p>Compare open commitments, completions, work-in-progress and actual written proof of work—then inspect the person, not just the number.</p></div>
+      <div class="gm-person-grid" id="gm-person-grid"></div>
+      <div class="gm-panel gm-detail" id="gm-person-detail"><div class="gm-empty">Select a team member to inspect their actions and recent work logs.</div></div>
+    </section>
+
+    <section class="gm-page" data-page-panel="projects">
+      <div class="gm-hero"><div class="gm-eyebrow">Portfolio intelligence</div><h1>Run every client project by health, ownership and delivery evidence.</h1><p>Project health is calculated from overdue actions, top-priority exposure, completion and available project logging.</p></div>
+      <div class="gm-controls"><label class="form-label">Project search<input class="form-control" id="gm-project-search" placeholder="Filter projects"></label><label class="form-label">Health<select class="form-select" id="gm-health-filter"><option value="all">All health levels</option><option value="critical">Critical</option><option value="risk">At risk</option><option value="healthy">Healthy</option></select></label></div>
+      <div class="gm-project-grid" id="gm-project-grid"></div>
+      <div class="gm-panel gm-detail" id="gm-project-detail"><div class="gm-empty">Select a project to inspect its open actions, owners and work-log evidence.</div></div>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      "use strict";
+      const root=document.getElementById("growmetric-command-center");
+      const SHEET_ID="1yOwch5aUaR-1qUzsJcueLr5jLO0aJpBSSG8vnpC0Ve8";
+      const state={actions:[],logs:[],projectLogs:[],live:false,page:"execution",executionMode:"actions",taskLimit:12,logLimit:12,filters:{owner:"all",project:"all",status:"open",priority:"all"},selectedPerson:null,selectedProject:null};
+      const $=s=>root.querySelector(s), $$=s=>Array.from(root.querySelectorAll(s));
+      const els={liveDot:$("#gm-live-dot"),liveLabel:$("#gm-live-label"),sync:$("#gm-sync"),open:$("#gm-open"),openNote:$("#gm-open-note"),wip:$("#gm-wip"),completed:$("#gm-completed"),rate:$("#gm-rate"),overdue:$("#gm-overdue"),coverage:$("#gm-coverage"),coverageNote:$("#gm-coverage-note"),owner:$("#gm-owner-filter"),project:$("#gm-project-filter"),status:$("#gm-status-filter"),priority:$("#gm-priority-filter"),taskList:$("#gm-task-list"),taskCount:$("#gm-task-count"),taskMore:$("#gm-task-more"),ownerBars:$("#gm-owner-bars"),executionCallout:$("#gm-execution-callout"),actionTab:$("#gm-action-tab"),logTab:$("#gm-log-tab"),actionView:$("#gm-action-view"),logView:$("#gm-log-view"),logPerson:$("#gm-log-person"),attendance:$("#gm-attendance-filter"),worklogList:$("#gm-worklog-list"),logMore:$("#gm-log-more"),latestDate:$("#gm-latest-date"),attendanceBars:$("#gm-attendance-bars"),logCallout:$("#gm-log-callout"),personGrid:$("#gm-person-grid"),personDetail:$("#gm-person-detail"),projectSearch:$("#gm-project-search"),health:$("#gm-health-filter"),projectGrid:$("#gm-project-grid"),projectDetail:$("#gm-project-detail")};
+      function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,ch=>({38:"&amp;",60:"&lt;",62:"&gt;",34:"&quot;",39:"&#39;"})[ch.charCodeAt(0)]);}
+      function status(v){const s=String(v||"").trim().toLowerCase();if(s==="completed")return"Completed";if(s==="closed")return"Closed";if(s==="wip")return"WIP";if(s==="recurring")return"Recurring";if(s==="picked")return"Picked";return"Not Started";}
+      function open(a){return status(a.status)!=="Completed"&&status(a.status)!=="Closed";}
+      function parseDate(v){const s=String(v||"").trim();let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);if(m){let y=Number(m[3]),a=Number(m[1]),b=Number(m[2]),day=a,month=b;if(y<100)y+=2000;if(b>12){month=a;day=b;}return new Date(y,month-1,day);}m=s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);if(m){const d=new Date(s);return isNaN(d)?null:d;}const d=new Date(s);return isNaN(d)?null:d;}
+      function time(v){const d=parseDate(v);return d?d.getTime():0;}
+      function overdue(a){const d=parseDate(a.deadline);if(!d||!open(a))return false;const today=new Date();today.setHours(0,0,0,0);d.setHours(0,0,0,0);return d<today;}
+      function priorityRank(v){return({Top:0,High:1,Medium:2,Low:3})[v]??9;}
+      function initials(v){return String(v||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();}
+      function countBy(rows,key){return Object.entries(rows.reduce((m,r)=>{const k=typeof key==="function"?key(r):(r[key]||"Unassigned");m[k]=(m[k]||0)+1;return m;},{})).sort((a,b)=>b[1]-a[1]);}
+      function latestLogDate(){return state.logs.filter(l=>l.attendance||(l.work&&l.work!=="-")).reduce((max,l)=>Math.max(max,time(l.date)),0);}
+      function formatDate(ts){return ts?new Date(ts).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"No date";}
+      function cell(c){if(!c)return"";return c.f!=null?c.f:c.v==null?"":String(c.v);}
+      function rawRows(response){if(!response||response.status==="error"||!response.table)throw new Error("Sheet response unavailable");return response.table.rows.map(r=>(r.c||[]).map(cell));}
+      function loadSheet(sheet,range,headers){return new Promise((resolve,reject)=>{const cb="__gm"+Date.now()+Math.random().toString(36).slice(2);const script=document.createElement("script");let done=false;const clean=()=>{delete window[cb];script.remove();};const timer=setTimeout(()=>{if(!done){done=true;clean();reject(new Error("Timed out"));}},14000);window[cb]=response=>{if(done)return;done=true;clearTimeout(timer);try{resolve(rawRows(response));}catch(e){reject(e);}finally{clean();}};script.onerror=()=>{if(done)return;done=true;clearTimeout(timer);clean();reject(new Error("Connection failed"));};script.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=responseHandler:"+cb+"&sheet="+encodeURIComponent(sheet)+"&range="+range+"&headers="+headers+"&cb="+Date.now();document.head.appendChild(script);});}
+      function parseActions(rows){return rows.map(r=>({date:r[0]||"",project:r[1]||"Unassigned",category:r[2]||"",task:r[3]||"",priority:r[4]||"Unspecified",deadline:r[5]||"",owner:r[6]||"Unassigned",status:status(r[7]),remarks:r[8]||""})).filter(a=>a.task);}
+      function parseLogs(rows){if(rows.length<3)return[];const headers=rows[0]||[],blocks=[];for(let i=0;i<headers.length;i++){if(/work tracker/i.test(headers[i]||"")){let name=String(headers[i]).replace(/work tracker.*$/i,"").trim();if(name.toLowerCase()==="sohail")name="Sohel";blocks.push({name,start:i});}}const logs=[];for(let r=2;r<rows.length;r++){for(const b of blocks){const row=rows[r]||[],date=row[b.start]||"",attendance=row[b.start+2]||"",work=row[b.start+3]||"";if(date||attendance||work)logs.push({person:b.name,date,day:row[b.start+1]||"",attendance,work});}}return logs;}
+      function parseProjectLogs(rows){if(rows.length<3)return[];const projects=[],top=rows[0]||[],types=rows[1]||[];for(let i=1;i<top.length;i++){if(top[i])projects.push({project:top[i],start:i});}const out=[];for(let r=2;r<rows.length;r++){const date=(rows[r]||[])[0]||"";for(const p of projects){const end=Math.min(p.start+11,types.length);for(let c=p.start;c<end;c++){const value=(rows[r]||[])[c]||"";if(value)out.push({date,project:p.project,type:types[c]||"Other Work",value});}}}return out;}
+      function metrics(){const total=state.actions.length,done=state.actions.filter(a=>status(a.status)==="Completed").length,opened=state.actions.filter(open),wip=opened.filter(a=>status(a.status)==="WIP").length,notStarted=opened.filter(a=>status(a.status)==="Not Started").length,late=opened.filter(overdue).length,latest=latestLogDate(),people=Array.from(new Set(state.logs.map(l=>l.person))),logged=new Set(state.logs.filter(l=>time(l.date)===latest&&l.work&&l.work!=="-").map(l=>l.person)).size;return{total,done,opened:opened.length,wip,notStarted,late,latest,people:people.length,logged,coverage:people.length?Math.round(logged/people.length*100):0};}
+      function renderMetrics(){const m=metrics();els.open.textContent=m.opened;els.openNote.textContent=m.notStarted+" not started";els.wip.textContent=m.wip;els.completed.textContent=m.done;els.rate.textContent=(m.total?Math.round(m.done/m.total*100):0)+"% completion rate";els.overdue.textContent=m.late;els.coverage.textContent=m.coverage+"%";els.coverageNote.textContent=m.logged+" of "+m.people+" logged on "+formatDate(m.latest);}
+      function fillSelect(el,items,label){const current=el.value;el.innerHTML='<option value="all">'+label+'</option>'+items.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");el.value=items.includes(current)?current:"all";}
+      function filteredActions(){return state.actions.filter(a=>{if(state.filters.owner!=="all"&&a.owner!==state.filters.owner)return false;if(state.filters.project!=="all"&&a.project!==state.filters.project)return false;if(state.filters.priority!=="all"&&a.priority!==state.filters.priority)return false;if(state.filters.status==="open")return open(a);return state.filters.status==="all"||status(a.status)===state.filters.status;}).sort((a,b)=>Number(overdue(b))-Number(overdue(a))||priorityRank(a.priority)-priorityRank(b.priority)||time(a.deadline)-time(b.deadline));}
+      function taskHtml(a){const s=status(a.status),late=overdue(a);return'<article class="gm-task'+(late?' gm-overdue':'')+'"><div class="gm-task-head"><div class="gm-task-title">'+(late?'⚠ ':'')+esc(a.task)+'</div><span class="viz-badge gm-priority '+(a.priority==='Top'?'is-top':a.priority==='High'?'is-high':'')+'">'+esc(a.priority)+'</span></div><div class="gm-task-meta"><span>'+esc(a.owner)+'</span><span>•</span><span>'+esc(a.project)+'</span><span>•</span><span>'+esc(s)+'</span>'+(a.deadline?'<span>•</span><span>'+(late?'Overdue ':'Due ')+esc(a.deadline)+'</span>':'')+(a.remarks?'<span>•</span><span>'+esc(a.remarks)+'</span>':'')+'</div></article>';}
+      function renderTaskList(){const rows=filteredActions(),visible=rows.slice(0,state.taskLimit);els.taskCount.textContent=rows.length+" tasks";els.taskMore.hidden=visible.length>=rows.length;els.taskList.innerHTML=visible.length?visible.map(taskHtml).join(""):'<div class="gm-empty">No action items match this view.</div>';}
+      function barsHtml(entries){const max=entries.length?entries[0][1]:1;return entries.map(([n,v])=>'<div><div class="gm-bar-head"><span>'+esc(n)+'</span><strong>'+v+'</strong></div><div class="gm-bar"><span style="width:'+Math.round(v/max*100)+'%"></span></div></div>').join("");}
+      function renderOwnerBars(){const entries=countBy(state.actions.filter(open),"owner").slice(0,8);els.ownerBars.innerHTML=barsHtml(entries);const top=entries[0];const late=state.actions.filter(overdue).length;els.executionCallout.textContent=top?top[0]+" currently owns the largest open queue ("+top[1]+"). "+(late?late+" overdue actions need escalation.":"No dated action is currently overdue."):"No open workload available.";}
+      function renderAction(){fillSelect(els.owner,Array.from(new Set(state.actions.map(a=>a.owner))).sort(),"All owners");fillSelect(els.project,Array.from(new Set(state.actions.map(a=>a.project))).sort(),"All projects");renderTaskList();renderOwnerBars();}
+      function logRows(){let rows=state.logs.filter(l=>l.work&&l.work!=="-");if(els.logPerson.value!=="all")rows=rows.filter(l=>l.person===els.logPerson.value);if(els.attendance.value!=="all")rows=rows.filter(l=>l.attendance===els.attendance.value);return rows.sort((a,b)=>time(b.date)-time(a.date));}
+      function renderLogs(){const people=Array.from(new Set(state.logs.map(l=>l.person))).sort(),attendance=Array.from(new Set(state.logs.map(l=>l.attendance).filter(Boolean))).sort();fillSelect(els.logPerson,people,"All team members");fillSelect(els.attendance,attendance,"All attendance");const rows=logRows(),visible=rows.slice(0,state.logLimit);els.logMore.hidden=visible.length>=rows.length;els.latestDate.textContent=formatDate(latestLogDate());els.worklogList.innerHTML=visible.length?visible.map(l=>'<article class="gm-worklog"><div class="gm-task-head"><strong>'+esc(l.person)+'</strong><span class="viz-badge">'+esc(l.attendance||"No attendance")+'</span></div><div class="gm-task-meta"><span>'+esc(l.date)+'</span><span>•</span><span>'+esc(l.day)+'</span></div><p>'+esc(l.work)+'</p></article>').join(""):'<div class="gm-empty">No work logs match this view.</div>';const attended=state.logs.filter(l=>l.attendance);els.attendanceBars.innerHTML=barsHtml(countBy(attended,"attendance").slice(0,8));const m=metrics(),missing=Math.max(0,m.people-m.logged);els.logCallout.textContent=missing?missing+" team member(s) have no written work proof on the latest tracked date.":"Every tracked team member has written work proof on the latest date.";}
+      function personStats(name){const actions=state.actions.filter(a=>a.owner===name),logs=state.logs.filter(l=>l.person===name),work=logs.filter(l=>l.work&&l.work!=="-");return{name,actions,logs,work,open:actions.filter(open).length,wip:actions.filter(a=>open(a)&&status(a.status)==="WIP").length,done:actions.filter(a=>status(a.status)==="Completed").length,late:actions.filter(overdue).length,last:work.sort((a,b)=>time(b.date)-time(a.date))[0]||null};}
+      function renderPeople(){const names=Array.from(new Set([...state.actions.map(a=>a.owner),...state.logs.map(l=>l.person)])).filter(n=>n&&n!=="Unassigned").sort(),people=names.map(personStats).sort((a,b)=>b.open-a.open);els.personGrid.innerHTML=people.map(p=>'<button type="button" class="gm-person'+(state.selectedPerson===p.name?' is-selected':'')+'" data-person="'+esc(p.name)+'"><div class="gm-person-head"><div class="gm-row" style="gap:9px"><div class="gm-avatar">'+esc(initials(p.name))+'</div><strong>'+esc(p.name)+'</strong></div><span class="gm-health '+(p.late?'is-critical':p.open>6?'is-risk':'')+'"></span></div><div class="gm-mini"><div><strong>'+p.open+'</strong><span>Open</span></div><div><strong>'+p.done+'</strong><span>Done</span></div><div><strong>'+p.work.length+'</strong><span>Logs</span></div></div></button>').join("");$$('[data-person]').forEach(b=>b.addEventListener('click',()=>{state.selectedPerson=b.dataset.person;renderPeople();renderPersonDetail();}));if(state.selectedPerson)renderPersonDetail();}
+      function renderPersonDetail(){const p=personStats(state.selectedPerson);if(!p.name)return;const tasks=p.actions.filter(open).sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)).slice(0,8),logs=p.work.sort((a,b)=>time(b.date)-time(a.date)).slice(0,6);els.personDetail.innerHTML='<div class="gm-section-head"><h2>'+esc(p.name)+' · delivery detail</h2><span class="viz-badge">'+p.open+' open / '+p.done+' completed</span></div><div class="gm-detail-grid"><div><h3>Open commitments</h3><div class="gm-list">'+(tasks.length?tasks.map(taskHtml).join(""):'<div class="gm-empty">No open commitments.</div>')+'</div></div><div><h3>Recent work proof</h3>'+(logs.length?logs.map(l=>'<article class="gm-worklog"><strong>'+esc(l.date)+'</strong><p>'+esc(l.work)+'</p></article>').join(""):'<div class="gm-empty">No written work logs.</div>')+'</div></div>';}
+      function normName(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"");}
+      function projectStats(name){const actions=state.actions.filter(a=>a.project===name),logs=state.projectLogs.filter(l=>normName(l.project)===normName(name)),opened=actions.filter(open),late=opened.filter(overdue).length,top=opened.filter(a=>a.priority==="Top").length,health=late?'critical':top||opened.length>7?'risk':'healthy';return{name,actions,logs,open:opened.length,done:actions.filter(a=>status(a.status)==="Completed").length,late,top,owners:new Set(actions.map(a=>a.owner).filter(x=>x&&x!=="Unassigned")).size,health};}
+      function renderProjects(){const search=els.projectSearch.value.trim().toLowerCase(),health=els.health.value;const names=Array.from(new Set(state.actions.map(a=>a.project))).filter(n=>n&&n!=="Unassigned");state.projectLogs.forEach(l=>{if(l.project&&l.project!=="Unassigned"&&!names.some(n=>normName(n)===normName(l.project)))names.push(l.project);});const projects=names.map(projectStats).filter(p=>(!search||p.name.toLowerCase().includes(search))&&(health==="all"||p.health===health)).sort((a,b)=>({critical:0,risk:1,healthy:2})[a.health]-({critical:0,risk:1,healthy:2})[b.health]||b.open-a.open);els.projectGrid.innerHTML=projects.length?projects.map(p=>'<button type="button" class="gm-project'+(state.selectedProject===p.name?' is-selected':'')+'" data-project="'+esc(p.name)+'"><div class="gm-project-head"><strong>'+esc(p.name)+'</strong><span class="viz-badge">'+(p.health==='critical'?'Critical':p.health==='risk'?'At risk':'Healthy')+'</span></div><div class="gm-mini"><div><strong>'+p.open+'</strong><span>Open</span></div><div><strong>'+p.done+'</strong><span>Done</span></div><div><strong>'+p.owners+'</strong><span>Owners</span></div></div></button>').join(""):'<div class="gm-empty">No projects match this filter.</div>';$$('[data-project]').forEach(b=>b.addEventListener('click',()=>{state.selectedProject=b.dataset.project;renderProjects();renderProjectDetail();}));if(state.selectedProject)renderProjectDetail();}
+      function renderProjectDetail(){const p=projectStats(state.selectedProject);if(!p.name)return;const tasks=p.actions.filter(open).sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)),logEntries=p.logs.slice().sort((a,b)=>time(b.date)-time(a.date));els.projectDetail.innerHTML='<div class="gm-section-head"><h2>'+esc(p.name)+' · project health</h2><span class="viz-badge">'+p.health.toUpperCase()+'</span></div><div class="gm-detail-grid"><div><h3>Open actions</h3><div class="gm-list">'+(tasks.length?tasks.slice(0,10).map(taskHtml).join(""):'<div class="gm-empty">No open actions.</div>')+'</div></div><div><h3>Projectwise work log</h3>'+(logEntries.length?logEntries.slice(0,10).map(l=>'<article class="gm-worklog"><strong>'+esc(l.type)+'</strong><div class="gm-task-meta">'+esc(l.date)+'</div><p>'+esc(l.value)+'</p></article>').join(""):'<div class="gm-callout is-warning">The Projectwise Work Log has no activity recorded for this project. Current health is derived from action items only.</div>')+'</div></div>';}
+      function renderAll(){renderMetrics();renderAction();renderLogs();renderPeople();renderProjects();}
+      function switchPage(page){state.page=page;$$('[data-page]').forEach(b=>{const on=b.dataset.page===page;b.classList.toggle('btn-primary',on);b.setAttribute('aria-pressed',String(on));});$$('[data-page-panel]').forEach(p=>p.classList.toggle('is-active',p.dataset.pagePanel===page));location.hash=page;}
+      function switchExecution(mode){state.executionMode=mode;const actions=mode==='actions';els.actionView.hidden=!actions;els.logView.hidden=actions;els.actionTab.classList.toggle('btn-primary',actions);els.logTab.classList.toggle('btn-primary',!actions);els.actionTab.setAttribute('aria-pressed',String(actions));els.logTab.setAttribute('aria-pressed',String(!actions));}
+      async function sync(){els.liveLabel.textContent='Syncing team workbook…';try{const [a,d,p]=await Promise.all([loadSheet('Action items','A2:I999',0),loadSheet('DOD Work tracker','A1:X247',0),loadSheet('Projectwise Work Log','A1:AH1001',0)]);state.actions=parseActions(a);state.logs=parseLogs(d);state.projectLogs=parseProjectLogs(p);state.live=true;els.liveDot.classList.add('is-live');els.liveLabel.textContent='Live from Google Sheets';els.sync.textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});renderAll();}catch(e){state.live=false;els.liveDot.classList.remove('is-live');els.liveLabel.textContent='Live connection unavailable';els.sync.textContent='Check Google Sheet view permissions';}}
+      $$('[data-page]').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+      els.actionTab.addEventListener('click',()=>switchExecution('actions'));els.logTab.addEventListener('click',()=>switchExecution('logs'));
+      [['owner','owner'],['project','project'],['status','status'],['priority','priority']].forEach(([key,id])=>els[id].addEventListener('change',e=>{state.filters[key]=e.target.value;state.taskLimit=12;renderTaskList();}));
+      els.taskMore.addEventListener('click',()=>{state.taskLimit+=12;renderTaskList();});
+      els.logPerson.addEventListener('change',()=>{state.logLimit=12;renderLogs();});els.attendance.addEventListener('change',()=>{state.logLimit=12;renderLogs();});els.logMore.addEventListener('click',()=>{state.logLimit+=12;renderLogs();});
+      els.projectSearch.addEventListener('input',renderProjects);els.health.addEventListener('change',renderProjects);
+      switchPage(['execution','people','projects'].includes(location.hash.slice(1))?location.hash.slice(1):'execution');switchExecution('actions');sync();setInterval(sync,60000);
+    })();
+  </script>
+</div>
+
+<script id="codex-visualization-floating-ui-core" src="https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js"></script>
+<script id="codex-visualization-floating-ui-dom" src="https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js"></script>
+<script id="codex-visualization-lucide" async src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
+<script id="codex-visualization-tooltip">/* oxlint-disable typescript/no-unsafe-argument, typescript/no-unsafe-call, typescript/no-unsafe-return */
+// Runs inside the visualization sandbox, not the host webview.
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+
+  const getTrigger = (target) =>
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest("[data-tooltip]")
+      : null;
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handleLeave = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    document.removeEventListener("pointerover", handlePointerOpen);
+    document.removeEventListener("pointerout", handleLeave);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", handleLeave);
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("contextmenu", handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener("pointerover", handlePointerOpen);
+  document.addEventListener("pointerout", handleLeave);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", handleLeave);
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script id="codex-visualization-lucide-initialization">(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+</body>
+</html>
