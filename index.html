@@ -977,7 +977,7 @@ svg {
       const state = { rows:seedRows, calendar:[], mode:"pending", category:"all", priority:"all", limit:10, live:false, totals:fallbackTotals };
       const $ = selector => root.querySelector(selector);
       const els = {
-        ring:$("#dash-ring"), progress:$("#dash-progress"), pending:$("#dash-pending"), wip:$("#dash-wip"), done:$("#dash-done"), high:$("#dash-high"),
+        ring:$("#dash-ring"), progress:$("#dash-progress"), motivation:$("#dash-motivation"), pending:$("#dash-pending"), wip:$("#dash-wip"), done:$("#dash-done"), high:$("#dash-high"),
         pendingNote:$("#dash-pending-note"), xp:$("#dash-xp"), milestoneLabel:$("#dash-milestone-label"), milestoneValue:$("#dash-milestone-value"), milestoneBar:$("#dash-milestone-bar"),
         list:$("#dash-list"), listTitle:$("#dash-list-title"), resultCount:$("#dash-result-count"), category:$("#dash-category"), priority:$("#dash-priority"), more:$("#dash-more"),
         pendingTab:$("#dash-tab-pending"), doneTab:$("#dash-tab-done"), bars:$("#dash-bars"), breakdownMode:$("#dash-breakdown-mode"), liveDot:$("#dash-live-dot"), liveLabel:$("#dash-live-label"), sync:$("#dash-sync"), dataNote:$("#dash-data-note"), confetti:$("#dash-confetti"),
@@ -1028,6 +1028,7 @@ svg {
         els.wip.textContent = totals.wip;
         els.done.textContent = totals.done;
         els.high.textContent = totals.high;
+        els.motivation.textContent = totals.high ? "You have "+totals.high+" top-priority missions. Choose one. Finish it. Then earn the next win." : "Your top-priority lane is clear. Pick the highest-impact pending action and close it completely.";
         els.pendingNote.textContent = Math.max(0,totals.pending-totals.wip) + " awaiting a start";
         els.xp.textContent = "Achievement score " + (state.live ? score(state.rows).toLocaleString("en-IN") : "3,540+");
         els.progress.textContent = progress + "%";
