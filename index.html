@@ -788,14 +788,17 @@ svg {
     @keyframes dash-fall { to { transform:translateY(280px) rotate(280deg); opacity:0; } }
     @media (prefers-reduced-motion:reduce) { #abdul-mission-dashboard * { animation:none !important; transition:none !important; } }
 
+    #abdul-mission-dashboard .dash-main-stack,
+    #abdul-mission-dashboard .dash-side-stack { display:grid; gap:16px; align-content:start; min-width:0; }
+    #abdul-mission-dashboard .dash-side-stack .dash-panel { padding:16px; }
     #abdul-mission-dashboard .dash-calendar {
-      margin-top:18px; padding:20px;
+      margin:0; padding:20px;
       border:1px solid var(--border); border-radius:20px; background:var(--card);
     }
     #abdul-mission-dashboard .dash-calendar-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; }
     #abdul-mission-dashboard .dash-calendar-head p { margin-top:4px; color:var(--muted-foreground); }
     #abdul-mission-dashboard .dash-calendar-summary { text-align:right; }
-    #abdul-mission-dashboard .dash-calendar-summary strong { display:block; font-size:18px; }
+    #abdul-mission-dashboard .dash-calendar-summary strong { display:block; font-size:16px; }
     #abdul-mission-dashboard .dash-calendar-list { display:grid; gap:8px; margin-top:16px; }
     #abdul-mission-dashboard .dash-event {
       display:grid; grid-template-columns:92px 12px minmax(0,1fr) auto; align-items:center; gap:12px;
@@ -809,9 +812,29 @@ svg {
     #abdul-mission-dashboard .dash-event-title { font-weight:500; }
     #abdul-mission-dashboard .dash-event-meta { color:var(--muted-foreground); font-size:12px; }
     #abdul-mission-dashboard .dash-calendar-empty { padding:18px; text-align:center; color:var(--muted-foreground); }
+    #abdul-mission-dashboard .dash-focus-list,
+    #abdul-mission-dashboard .dash-deadline-list { display:grid; gap:8px; margin-top:13px; }
+    #abdul-mission-dashboard .dash-focus-item {
+      padding:11px; border:1px solid var(--border); border-radius:13px; background:var(--secondary);
+    }
+    #abdul-mission-dashboard .dash-focus-item.is-overdue {
+      border-color:color-mix(in srgb,var(--destructive) 45%,var(--border));
+      background:color-mix(in srgb,var(--destructive) 8%,var(--secondary));
+    }
+    #abdul-mission-dashboard .dash-focus-title { font-weight:500; line-height:1.3; overflow-wrap:anywhere; }
+    #abdul-mission-dashboard .dash-focus-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; color:var(--muted-foreground); font-size:11px; }
+    #abdul-mission-dashboard .dash-focus-meta .is-urgent { color:var(--destructive); font-weight:500; }
+    #abdul-mission-dashboard .dash-top-badge { background:color-mix(in srgb,var(--dash-warning) 24%,var(--card)); }
+    #abdul-mission-dashboard .dash-task.is-top-priority {
+      border-color:color-mix(in srgb,var(--dash-warning) 50%,var(--border));
+      background:color-mix(in srgb,var(--dash-warning) 7%,var(--card));
+    }
+    #abdul-mission-dashboard .dash-side-note { margin-top:12px; color:var(--muted-foreground); font-size:11px; }
     @media (max-width:820px) {
       #abdul-mission-dashboard { padding:10px; }
       #abdul-mission-dashboard .dash-layout { grid-template-columns:1fr; }
+      #abdul-mission-dashboard .dash-side-stack { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #abdul-mission-dashboard .dash-side-stack .dash-breakdown-panel { grid-column:1 / -1; }
       #abdul-mission-dashboard .dash-event { grid-template-columns:88px 12px minmax(0,1fr); }
       #abdul-mission-dashboard .dash-event > .viz-badge { grid-column:3; justify-self:start; }
       #abdul-mission-dashboard .dash-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -826,6 +849,8 @@ svg {
       #abdul-mission-dashboard .dash-panel { padding:14px; }
       #abdul-mission-dashboard .dash-stat { min-height:96px; }
       #abdul-mission-dashboard .dash-calendar { padding:14px; }
+      #abdul-mission-dashboard .dash-side-stack { grid-template-columns:1fr; }
+      #abdul-mission-dashboard .dash-side-stack .dash-breakdown-panel { grid-column:auto; }
       #abdul-mission-dashboard .dash-calendar-head { align-items:flex-start; }
       #abdul-mission-dashboard .dash-calendar-summary { text-align:left; }
       #abdul-mission-dashboard .dash-event { grid-template-columns:76px 10px minmax(0,1fr); gap:8px; }
@@ -865,51 +890,75 @@ svg {
       <div class="card viz-stat dash-stat"><div class="dash-stat-top"><span class="text-muted">Pending missions</span><span class="viz-badge">Queue</span></div><div class="viz-stat-value" id="dash-pending">185</div><div class="dash-stat-note" id="dash-pending-note">89 awaiting a start</div></div>
       <div class="card viz-stat dash-stat"><div class="dash-stat-top"><span class="text-muted">In progress</span><span class="viz-badge">Momentum</span></div><div class="viz-stat-value" id="dash-wip">96</div><div class="dash-stat-note" id="dash-wip-note">Keep the active list tight</div></div>
       <div class="card viz-stat dash-stat"><div class="dash-stat-top"><span class="text-muted">Achievements</span><span class="viz-badge">Wins</span></div><div class="viz-stat-value" id="dash-done">120</div><div class="dash-stat-note" id="dash-xp">Achievement score 0</div></div>
-      <div class="card viz-stat dash-stat"><div class="dash-stat-top"><span class="text-muted">P0 + P1 focus</span><span class="viz-badge">Impact</span></div><div class="viz-stat-value" id="dash-high">117</div><div class="dash-stat-note">Finish impact before volume</div></div>
+      <div class="card viz-stat dash-stat"><div class="dash-stat-top"><span class="text-muted">Top priorities</span><span class="viz-badge">Focus</span></div><div class="viz-stat-value" id="dash-high">117</div><div class="dash-stat-note">Finish the flagged list first</div></div>
     </section>
 
-
-    <section class="dash-calendar" aria-labelledby="dash-calendar-title">
-      <div class="dash-calendar-head">
-        <div>
-          <div class="dash-kicker">Plan the day. Win the day.</div>
-          <h2 id="dash-calendar-title">Today’s Calendar</h2>
-          <p id="dash-calendar-date">Loading your agenda…</p>
-        </div>
-        <div class="dash-calendar-summary">
-          <strong id="dash-calendar-next">Syncing</strong>
-          <span class="dash-muted" id="dash-calendar-count">Calendar feed</span>
-        </div>
-      </div>
-      <div class="dash-calendar-list" id="dash-calendar-list" aria-live="polite"></div>
-    </section>
 
     <section class="dash-layout">
-      <div class="dash-panel">
-        <div class="dash-section-head">
-          <h2 id="dash-list-title">Priority mission queue</h2>
-          <span class="viz-badge" id="dash-result-count">0 shown</span>
-        </div>
-        <div class="dash-tabs" role="group" aria-label="Task view">
-          <button type="button" class="btn btn-primary" id="dash-tab-pending" aria-pressed="true">Pending</button>
-          <button type="button" class="btn" id="dash-tab-done" aria-pressed="false">Achievements</button>
-        </div>
-        <div class="dash-controls">
-          <label class="form-label">Category<select class="form-select" id="dash-category"><option value="all">All categories</option></select></label>
-          <label class="form-label">Priority<select class="form-select" id="dash-priority"><option value="all">All priorities</option><option value="0">P0 — critical</option><option value="1">P1 — high</option><option value="2">P2 — medium</option><option value="3">P3 — normal</option><option value="none">No priority</option></select></label>
-        </div>
-        <div class="dash-list" id="dash-list" aria-live="polite"></div>
-        <button type="button" class="btn dash-load-more" id="dash-more">Show more</button>
+      <div class="dash-main-stack">
+        <section class="dash-panel" aria-labelledby="dash-list-title">
+          <div class="dash-section-head">
+            <div>
+              <div class="dash-kicker">Do what matters first</div>
+              <h2 id="dash-list-title">Important Action Items</h2>
+            </div>
+            <span class="viz-badge" id="dash-result-count">0 shown</span>
+          </div>
+          <div class="dash-tabs" role="group" aria-label="Task view">
+            <button type="button" class="btn btn-primary" id="dash-tab-pending" aria-pressed="true">Pending</button>
+            <button type="button" class="btn" id="dash-tab-done" aria-pressed="false">Achievements</button>
+          </div>
+          <div class="dash-controls">
+            <label class="form-label">Category<select class="form-select" id="dash-category"><option value="all">All categories</option></select></label>
+            <label class="form-label">Priority<select class="form-select" id="dash-priority"><option value="all">All priorities</option><option value="0">P0 — critical</option><option value="1">P1 — high</option><option value="2">P2 — medium</option><option value="3">P3 — normal</option><option value="none">No priority</option></select></label>
+          </div>
+          <div class="dash-list" id="dash-list" aria-live="polite"></div>
+          <button type="button" class="btn dash-load-more" id="dash-more">Show more</button>
+        </section>
+
+        <section class="dash-calendar" aria-labelledby="dash-calendar-title">
+          <div class="dash-calendar-head">
+            <div>
+              <div class="dash-kicker">Plan the day. Win the day.</div>
+              <h2 id="dash-calendar-title">Today’s Calendar</h2>
+              <p id="dash-calendar-date">Loading your agenda…</p>
+            </div>
+            <div class="dash-calendar-summary">
+              <strong id="dash-calendar-next">Syncing</strong>
+              <span class="dash-muted" id="dash-calendar-count">Calendar feed</span>
+            </div>
+          </div>
+          <div class="dash-calendar-list" id="dash-calendar-list" aria-live="polite"></div>
+        </section>
       </div>
 
-      <aside class="dash-panel" aria-labelledby="dash-breakdown-title">
-        <div class="dash-section-head"><h2 id="dash-breakdown-title">Where attention sits</h2><span class="viz-badge" id="dash-breakdown-mode">Pending</span></div>
-        <div class="dash-bars" id="dash-bars" role="img" aria-label="Tasks by category"></div>
-        <div class="dash-quote" id="dash-quote">Momentum is not motivation. It is proof created by finishing.</div>
-        <div class="dash-footer">
-          <span class="dash-muted" id="dash-data-note">Live data refreshes every minute.</span>
-          <a class="btn" href="https://docs.google.com/spreadsheets/d/1j193UFflGRY3zzYc-g1bJHXpsT9VhHYaZb-zFPFxunU/edit#gid=1848476256" target="_blank" rel="noreferrer">Update tasks in Sheet</a>
-        </div>
+      <aside class="dash-side-stack" aria-label="Priority and deadline command column">
+        <section class="dash-panel" aria-labelledby="dash-top-title">
+          <div class="dash-section-head">
+            <h2 id="dash-top-title">Top Priority</h2>
+            <span class="viz-badge dash-top-badge" id="dash-top-count">0</span>
+          </div>
+          <div class="dash-focus-list" id="dash-top-list"></div>
+          <div class="dash-side-note">Flag an item “Yes” in the Sheet to keep it in this focus lane.</div>
+        </section>
+
+        <section class="dash-panel" aria-labelledby="dash-deadline-title">
+          <div class="dash-section-head">
+            <h2 id="dash-deadline-title">Deadline Watch</h2>
+            <span class="viz-badge" id="dash-deadline-count">0</span>
+          </div>
+          <div class="dash-deadline-list" id="dash-deadline-list"></div>
+        </section>
+
+        <section class="dash-panel dash-breakdown-panel" aria-labelledby="dash-breakdown-title">
+          <div class="dash-section-head"><h2 id="dash-breakdown-title">Where Attention Sits</h2><span class="viz-badge" id="dash-breakdown-mode">Pending</span></div>
+          <div class="dash-bars" id="dash-bars" role="img" aria-label="Tasks by category"></div>
+          <div class="dash-quote" id="dash-quote">Momentum is not motivation. It is proof created by finishing.</div>
+          <div class="dash-footer">
+            <span class="dash-muted" id="dash-data-note">Live data refreshes every minute.</span>
+            <a class="btn" href="https://docs.google.com/spreadsheets/d/1j193UFflGRY3zzYc-g1bJHXpsT9VhHYaZb-zFPFxunU/edit#gid=1848476256" target="_blank" rel="noreferrer">Update tasks in Sheet</a>
+          </div>
+        </section>
       </aside>
     </section>
   </main>
@@ -920,7 +969,7 @@ svg {
       const root = document.getElementById("abdul-mission-dashboard");
       const SHEET_ID = "1j193UFflGRY3zzYc-g1bJHXpsT9VhHYaZb-zFPFxunU";
       const seedRows = [];
-      const fallbackTotals = { pending:185, wip:96, done:120, high:117, all:359 };
+      const fallbackTotals = { pending:185, wip:96, done:120, high:13, all:359 };
       const fallbackBreakdown = {
         pending:[["Growmetric Business",75],["Personal",50],["Official",38],["Alternate Business",13],["Upskilling",7]],
         done:[["Personal",45],["Growmetric Business",39],["Official",33],["Alternate Business",3]]
@@ -932,30 +981,44 @@ svg {
         pendingNote:$("#dash-pending-note"), xp:$("#dash-xp"), milestoneLabel:$("#dash-milestone-label"), milestoneValue:$("#dash-milestone-value"), milestoneBar:$("#dash-milestone-bar"),
         list:$("#dash-list"), listTitle:$("#dash-list-title"), resultCount:$("#dash-result-count"), category:$("#dash-category"), priority:$("#dash-priority"), more:$("#dash-more"),
         pendingTab:$("#dash-tab-pending"), doneTab:$("#dash-tab-done"), bars:$("#dash-bars"), breakdownMode:$("#dash-breakdown-mode"), liveDot:$("#dash-live-dot"), liveLabel:$("#dash-live-label"), sync:$("#dash-sync"), dataNote:$("#dash-data-note"), confetti:$("#dash-confetti"),
-        calendarList:$("#dash-calendar-list"), calendarDate:$("#dash-calendar-date"), calendarNext:$("#dash-calendar-next"), calendarCount:$("#dash-calendar-count")
+        calendarList:$("#dash-calendar-list"), calendarDate:$("#dash-calendar-date"), calendarNext:$("#dash-calendar-next"), calendarCount:$("#dash-calendar-count"),
+        topList:$("#dash-top-list"), topCount:$("#dash-top-count"), deadlineList:$("#dash-deadline-list"), deadlineCount:$("#dash-deadline-count")
       };
 
       function cleanStatus(value) { return String(value || "").trim().toLowerCase(); }
       function isDone(row) { return cleanStatus(row.status) === "completed"; }
       function isClosed(row) { return cleanStatus(row.status) === "closed"; }
       function isPending(row) { return !isDone(row) && !isClosed(row); }
+      function isTop(row) { return cleanStatus(row.topPriority) === "yes"; }
       function priorityValue(row) { return Number.isFinite(row.priority) ? row.priority : 9; }
       function parseDate(value) {
         const parts = String(value || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        return parts ? new Date(Number(parts[3]), Number(parts[2]) - 1, Number(parts[1])).getTime() : 0;
+        return parts ? Date.UTC(Number(parts[3]), Number(parts[2]) - 1, Number(parts[1])) : 0;
+      }
+      function parseDeadline(value) {
+        const parts=String(value||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if(!parts) return 0;
+        const a=Number(parts[1]), b=Number(parts[2]), year=Number(parts[3]);
+        const month=a>12?b:a, day=a>12?a:b;
+        return Date.UTC(year,month-1,day);
+      }
+      function deadlineRank(row) { return row.deadlineTs || Number.MAX_SAFE_INTEGER; }
+      function todayUtc() {
+        const p=indiaNow().date.split("-").map(Number);
+        return Date.UTC(p[0],p[1]-1,p[2]);
       }
       function escapeHtml(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({38:"&amp;",60:"&lt;",62:"&gt;",34:"&quot;",39:"&#39;"})[ch.charCodeAt(0)]); }
       function score(rows) { return rows.filter(isDone).reduce((sum,row) => sum + ({0:40,1:30,2:20,3:10}[row.priority] || 10),0); }
       function calculateTotals(rows) {
         const pending = rows.filter(isPending);
         const done = rows.filter(isDone);
-        return { pending:pending.length, wip:pending.filter(row => cleanStatus(row.status) === "wip").length, done:done.length, high:pending.filter(row => row.priority === 0 || row.priority === 1).length, all:rows.length };
+        return { pending:pending.length, wip:pending.filter(row => cleanStatus(row.status) === "wip").length, done:done.length, high:pending.filter(isTop).length, all:rows.length };
       }
       function currentRows() {
         let rows = state.rows.filter(state.mode === "pending" ? isPending : isDone);
         if (state.category !== "all") rows = rows.filter(row => row.category === state.category);
         if (state.priority !== "all") rows = rows.filter(row => state.priority === "none" ? !Number.isFinite(row.priority) : String(row.priority) === state.priority);
-        return rows.sort((a,b) => state.mode === "pending" ? priorityValue(a)-priorityValue(b) || parseDate(b.added)-parseDate(a.added) : parseDate(b.added)-parseDate(a.added));
+        return rows.sort((a,b) => state.mode === "pending" ? Number(isTop(b))-Number(isTop(a)) || deadlineRank(a)-deadlineRank(b) || priorityValue(a)-priorityValue(b) || parseDate(b.added)-parseDate(a.added) : parseDate(b.added)-parseDate(a.added));
       }
       function renderMetrics() {
         const totals = state.live ? calculateTotals(state.rows) : state.totals;
@@ -986,17 +1049,34 @@ svg {
       function renderList() {
         const rows = currentRows();
         const visible = rows.slice(0,state.limit);
-        els.listTitle.textContent = state.mode === "pending" ? "Priority mission queue" : "Achievement vault";
+        els.listTitle.textContent = state.mode === "pending" ? "Important Action Items" : "Achievement Vault";
         els.resultCount.textContent = rows.length + " total";
         els.more.hidden = visible.length >= rows.length;
         if (!visible.length) { els.list.innerHTML = '<div class="dash-empty">No tasks match this view.</div>'; return; }
         els.list.innerHTML = visible.map(row => {
           const priority = Number.isFinite(row.priority) ? "P"+row.priority : "—";
           const status = isDone(row) ? "Achievement" : cleanStatus(row.status) === "wip" ? "In progress" : "Not started";
-          const klass = isDone(row) ? " dash-achievement-row" : "";
-          const icon = isDone(row) ? "🏆" : row.priority === 0 ? "⚡" : "○";
-          return '<article class="dash-task'+klass+'"><div class="dash-task-main"><div class="dash-task-title">'+icon+' '+escapeHtml(row.task)+'</div><span class="viz-badge dash-priority '+(row.priority===0?'is-p0':row.priority===1?'is-p1':'')+'">'+priority+'</span></div><div class="dash-task-meta"><span>'+escapeHtml(row.category)+'</span><span>•</span><span>'+escapeHtml(status)+'</span>'+(row.added?'<span>•</span><span>Added '+escapeHtml(row.added)+'</span>':'')+(row.remarks?'<span>•</span><span>'+escapeHtml(row.remarks)+'</span>':'')+'</div></article>';
+          const klass = (isDone(row) ? " dash-achievement-row" : "") + (isTop(row) && isPending(row) ? " is-top-priority" : "");
+          const icon = isDone(row) ? "🏆" : isTop(row) ? "★" : row.priority === 0 ? "⚡" : "○";
+          const top = isTop(row) && isPending(row) ? '<span class="viz-badge dash-top-badge">Top priority</span>' : "";
+          const due = row.deadline ? '<span>•</span><span>Due '+escapeHtml(row.deadline)+'</span>' : "";
+          return '<article class="dash-task'+klass+'"><div class="dash-task-main"><div class="dash-task-title">'+icon+' '+escapeHtml(row.task)+'</div><span class="viz-badge dash-priority '+(row.priority===0?'is-p0':row.priority===1?'is-p1':'')+'">'+priority+'</span></div><div class="dash-task-meta">'+top+'<span>'+escapeHtml(row.category)+'</span><span>•</span><span>'+escapeHtml(status)+'</span>'+due+(row.remarks?'<span>•</span><span>'+escapeHtml(row.remarks)+'</span>':'')+'</div></article>';
         }).join("");
+      }
+      function focusRowHtml(row,deadlineMode) {
+        const delta=row.deadlineTs ? Math.round((row.deadlineTs-todayUtc())/86400000) : null;
+        const overdue=deadlineMode && delta!=null && delta<0;
+        const timing=delta==null?"":delta<0?Math.abs(delta)+"d overdue":delta===0?"Due today":delta===1?"Due tomorrow":"Due in "+delta+"d";
+        return '<article class="dash-focus-item'+(overdue?' is-overdue':'')+'"><div class="dash-focus-title">'+(deadlineMode?"⏳ ":"★ ")+escapeHtml(row.task)+'</div><div class="dash-focus-meta"><span>'+escapeHtml(row.category)+'</span>'+(Number.isFinite(row.priority)?'<span>• P'+row.priority+'</span>':'')+(row.deadline?'<span>• '+escapeHtml(row.deadline)+'</span>':'')+(timing?'<span class="'+(overdue?'is-urgent':'')+'">• '+escapeHtml(timing)+'</span>':'')+'</div></article>';
+      }
+      function renderFocusPanels() {
+        const pending=state.rows.filter(isPending);
+        const top=pending.filter(isTop).sort((a,b)=>deadlineRank(a)-deadlineRank(b)||priorityValue(a)-priorityValue(b));
+        const deadlines=pending.filter(row=>row.deadlineTs).sort((a,b)=>a.deadlineTs-b.deadlineTs);
+        els.topCount.textContent=top.length;
+        els.deadlineCount.textContent=deadlines.length;
+        els.topList.innerHTML=top.length?top.slice(0,7).map(row=>focusRowHtml(row,false)).join(""):'<div class="dash-empty">No task is flagged yet.</div>';
+        els.deadlineList.innerHTML=deadlines.length?deadlines.slice(0,6).map(row=>focusRowHtml(row,true)).join(""):'<div class="dash-empty">No pending deadlines assigned.</div>';
       }
       function renderBars() {
         const source = state.rows.filter(state.mode === "pending" ? isPending : isDone);
@@ -1007,14 +1087,14 @@ svg {
         els.bars.innerHTML = entries.map(([name,count]) => '<div><div class="dash-bar-head"><span>'+escapeHtml(name)+'</span><strong>'+count+'</strong></div><div class="dash-bar"><span style="width:'+Math.round(count/max*100)+'%"></span></div></div>').join("");
         els.bars.setAttribute("aria-label",(state.mode === "pending" ? "Pending tasks" : "Completed achievements")+" by category: "+entries.map(item=>item[0]+" "+item[1]).join(", "));
       }
-      function render() { renderMetrics(); renderCategories(); renderList(); renderBars(); }
+      function render() { renderMetrics(); renderCategories(); renderList(); renderFocusPanels(); renderBars(); }
       function setMode(mode) {
         state.mode=mode; state.limit=10;
         els.pendingTab.classList.toggle("btn-primary",mode==="pending");
         els.doneTab.classList.toggle("btn-primary",mode==="done");
         els.pendingTab.setAttribute("aria-pressed",String(mode==="pending"));
         els.doneTab.setAttribute("aria-pressed",String(mode==="done"));
-        renderList(); renderBars();
+        renderList(); renderFocusPanels(); renderBars();
       }
       function celebrate(amount) {
         if (!amount || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -1032,7 +1112,10 @@ svg {
         return response.table.rows.map(item => {
           const c=item.c||[];
           const rawPriority=c[4]&&c[4].v;
-          return {added:formattedCell(c[0]),category:formattedCell(c[1])||"Uncategorised",sub:formattedCell(c[2]),task:formattedCell(c[3]),priority:rawPriority===""||rawPriority==null?null:Number(rawPriority),status:formattedCell(c[5]),deadline:formattedCell(c[6]),remarks:formattedCell(c[7])};
+          const deadline=formattedCell(c[7]);
+          const rawDeadline=c[7]&&c[7].v;
+          const deadlineTs=rawDeadline instanceof Date&&!Number.isNaN(rawDeadline.getTime())?Date.UTC(rawDeadline.getFullYear(),rawDeadline.getMonth(),rawDeadline.getDate()):parseDeadline(deadline);
+          return {added:formattedCell(c[0]),category:formattedCell(c[1])||"Uncategorised",sub:formattedCell(c[2]),task:formattedCell(c[3]),priority:rawPriority===""||rawPriority==null?null:Number(rawPriority),topPriority:formattedCell(c[5]),status:formattedCell(c[6]),deadline,deadlineTs,remarks:formattedCell(c[8])};
         }).filter(row=>row.task);
       }
 
@@ -1096,7 +1179,7 @@ svg {
           const timer=setTimeout(()=>{ if(!settled){settled=true;cleanup();reject(new Error("Timed out"));}},12000);
           window[callback]=response=>{ if(settled)return; settled=true; clearTimeout(timer); try { resolve(responseRows(response)); } catch(error){ reject(error); } finally { cleanup(); } };
           script.onerror=()=>{ if(settled)return; settled=true; clearTimeout(timer); cleanup(); reject(new Error("Could not reach Google Sheet")); };
-          script.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=responseHandler:"+callback+"&sheet=Tasks&range=A1:H998&headers=1&cb="+Date.now();
+          script.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=responseHandler:"+callback+"&sheet=Tasks&range=A:I&headers=1&cb="+Date.now();
           document.head.appendChild(script);
         });
       }
