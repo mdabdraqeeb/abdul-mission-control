@@ -1173,7 +1173,7 @@ svg {
       }
       function minutesOf(value) {
         const m=String(value||"").match(/^(\d{1,2}):(\d{2})$/);
-        return m ? Number(m[1])*60+Number(m[2]) : 0;
+        return m ? Number(m[1])*60+Number(m[2]) : Number.POSITIVE_INFINITY;
       }
       function displayTime(value) {
         const m=String(value||"").match(/^(\d{1,2}):(\d{2})$/);
@@ -1184,18 +1184,22 @@ svg {
       function renderCalendar() {
         const now=indiaNow();
         const events=state.calendar.filter(row => cleanStatus(row.status)==="active" && (String(row.recurrence).toUpperCase()==="DAILY" || row.date===now.date)).sort((a,b)=>minutesOf(a.start)-minutesOf(b.start));
-        const completed=events.filter(e=>minutesOf(e.end)<=now.minutes).length;
-        const current=events.find(e=>minutesOf(e.start)<=now.minutes && minutesOf(e.end)>now.minutes);
-        const next=events.find(e=>minutesOf(e.start)>now.minutes);
+        const completed=events.filter(e=>Number.isFinite(minutesOf(e.end)) && minutesOf(e.end)<=now.minutes).length;
+        const current=events.find(e=>Number.isFinite(minutesOf(e.start)) && Number.isFinite(minutesOf(e.end)) && minutesOf(e.start)<=now.minutes && minutesOf(e.end)>now.minutes);
+        const next=events.find(e=>Number.isFinite(minutesOf(e.start)) && minutesOf(e.start)>now.minutes);
+        const unscheduled=events.filter(e=>!Number.isFinite(minutesOf(e.start)) || !Number.isFinite(minutesOf(e.end))).length;
         els.calendarDate.textContent=new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date());
         els.calendarCount.textContent=completed+" of "+events.length+" time blocks completed";
-        els.calendarNext.textContent=current ? "Now: "+current.event : next ? "Next: "+displayTime(next.start) : events.length ? "Day complete ✓" : "No events";
+        els.calendarNext.textContent=current ? "Now: "+current.event : next ? "Next: "+displayTime(next.start) : unscheduled ? unscheduled+" meeting"+(unscheduled===1?"":"s")+" awaiting time" : events.length ? "Day complete ✓" : "No events";
         if(!events.length){els.calendarList.innerHTML='<div class="dash-calendar-empty">Nothing scheduled for today.</div>';return;}
         els.calendarList.innerHTML=events.map(e=>{
           const start=minutesOf(e.start), end=minutesOf(e.end);
-          const klass=now.minutes>=end?" is-done":now.minutes>=start&&now.minutes<end?" is-current":"";
-          const label=now.minutes>=end?"Done":now.minutes>=start&&now.minutes<end?"Now":"Upcoming";
-          return '<article class="dash-event'+klass+'"><div class="dash-event-time">'+escapeHtml(displayTime(e.start))+'</div><span class="dash-event-dot" aria-hidden="true"></span><div><div class="dash-event-title">'+escapeHtml(e.event)+'</div><div class="dash-event-meta">'+escapeHtml(displayTime(e.start))+'–'+escapeHtml(displayTime(e.end))+(e.location?' · '+escapeHtml(e.location):'')+'</div></div><span class="viz-badge">'+label+'</span></article>';
+          const hasTime=Number.isFinite(start)&&Number.isFinite(end);
+          const klass=hasTime&&(now.minutes>=end?" is-done":now.minutes>=start&&now.minutes<end?" is-current":"");
+          const label=!hasTime?"Time TBD":now.minutes>=end?"Done":now.minutes>=start&&now.minutes<end?"Now":"Upcoming";
+          const timeLabel=hasTime?displayTime(e.start):"TBD";
+          const meta=hasTime?displayTime(e.start)+"–"+displayTime(e.end):"Time to be confirmed";
+          return '<article class="dash-event'+klass+'"><div class="dash-event-time">'+escapeHtml(timeLabel)+'</div><span class="dash-event-dot" aria-hidden="true"></span><div><div class="dash-event-title">'+escapeHtml(e.event)+'</div><div class="dash-event-meta">'+escapeHtml(meta)+(e.location?' · '+escapeHtml(e.location):'')+'</div></div><span class="viz-badge">'+label+'</span></article>';
         }).join("");
       }
       function loadLiveData() {
